@@ -1,5 +1,5 @@
 # weishaupt-ebus-reader
-Read and decode messages from Weishaupt WTC devices using ebus protocol
+Read and decode messages from Weishaupt devices using ebus protocol
 
 ## structure
 EBUS<br>
