@@ -1,5 +1,6 @@
 # Weishaupt eBus Reader
-Read and decode messages from Weishaupt devices using ebus protocol
+This script reads and decodes messages from Weishaupt devices using ebus protocol.<br>
+They are processed and sent to ioBroker via MQTT.
 
 ## structure
 EBUS<br>
