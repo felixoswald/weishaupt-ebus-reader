@@ -76,9 +76,9 @@ wert = 0.00
 retry = 0
 x = 0
 hsb_bin = '00000000'
-vorzeichen = '0'
+vorzeichen = ''
 
-print("[INFO] eBus Reading 2.5")
+print("[INFO] eBus Reading 2.5.1")
 print("------------------------------------------------------------------------------")
 print("[INFO] Tempfile: %s" % (tempfile))
 
@@ -96,6 +96,10 @@ print(" ")
 
 while True:
 	# array loop
+	with open('negation.log', 'a') as negation:
+		now = datetime.now()
+		negation.write('\n%s;' % (now.strftime("%Y-%m-%d %H:%M:%S")))
+
 	while x < len(parameter):
 		if retry == 0 and wert == 0:
 			print(" ")
@@ -107,17 +111,11 @@ while True:
 				antwort = file.read().replace('\n', '')
 			print("[eBus] %-9s : %6s" % (parameter[x][0], antwort))
 
-			## debug Negation!
-			if parameter[x][1] == "f650220332290a":
-				with open('kollektor.log', 'a') as aussen:
-					now = datetime.now()
-					aussen.write('%s;%s\n' % (now.strftime("%Y-%m-%d %H:%M:%S"), antwort))
-
 			# wandlung & berechnung
 			lsb_hex = antwort[2:4]
 			hsb_hex = antwort[4:6]
 
-			if parameter[x][4] == False:
+			if parameter[x][4] == False: # kann nicht negativ werden
 				lsb_int = int(lsb_hex, 16)
 				hsb_int = int(hsb_hex, 16)
 				wert += ((lsb_int + hsb_int * 256) * parameter[x][2])
@@ -133,14 +131,20 @@ while True:
 
 				if lsb_bin[0] == '0': #positiv
 					wert += ((lsb_int + hsb_int * 256) * parameter[x][2])
+					vorzeichen = '+'
 				else: #negativ
 					# wert += ((((lsb_int_negiert +1) / 256) + hsb_int_negiert) * parameter[x][2] * (-1))
 					wert -= ((lsb_int_negiert + 1) + hsb_int_negiert / 256) * parameter[x][2]
+					vorzeichen = '-'
+
+				## debug Negation!
+				with open('negation.log', 'a') as negation:
+					negation.write(';%s;%s;%s;%s;%s;%s;%s;%s;%s;%d;%d;%d;%d;%s;%.4f;' % (parameter[x][0], parameter[x][1], antwort, lsb_hex, hsb_hex, lsb_bin, hsb_bin, lsb_bin_negiert, hsb_bin_negiert, lsb_int, hsb_int, lsb_int_negiert, hsb_int_negiert, vorzeichen, wert))
 
 			print("[eBus] Wert: %.2f" %(wert))
 			
 			# mqtt send
-			if parameter[x][3] == False:
+			if parameter[x][3] == False: 
 				if parameter[x][6] == 0:
 					print("[MQTT] Sende Wert: %.2f %s" %(wert, parameter[x][5]))
 					client.publish('%s/%s/wert' % (mqtttopic, parameter[x][0]), wert, 1)
