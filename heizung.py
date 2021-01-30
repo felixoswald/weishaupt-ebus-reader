@@ -115,7 +115,7 @@ while True:
 			lsb_hex = antwort[2:4]
 			hsb_hex = antwort[4:6]
 
-			if parameter[x][4] == False: # für Werte die nicht negativ werden
+			if parameter[x][4] == False: # kann nicht negativ werden
 				lsb_int = int(lsb_hex, 16)
 				hsb_int = int(hsb_hex, 16)
 				wert += ((lsb_int + hsb_int * 256) * parameter[x][2])
@@ -129,7 +129,7 @@ while True:
 				lsb_int_negiert = int(lsb_bin_negiert, 2)
 				hsb_int_negiert = int(hsb_bin_negiert, 2)
 
-				if lsb_bin[0] == '0': #positiv
+				if hsb_bin[0] == '0': #positiv
 					wert += ((lsb_int + hsb_int * 256) * parameter[x][2])
 					vorzeichen = '+'
 				else: #negativ
@@ -144,7 +144,7 @@ while True:
 			print("[eBus] Wert: %.2f" %(wert))
 			
 			# mqtt send
-			if parameter[x][3] == False:
+			if parameter[x][3] == False: 
 				if parameter[x][6] == 0:
 					print("[MQTT] Sende Wert: %.2f %s" %(wert, parameter[x][5]))
 					client.publish('%s/%s/wert' % (mqtttopic, parameter[x][0]), wert, 1)
